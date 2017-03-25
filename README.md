@@ -1,6 +1,6 @@
 <h3>hello, TeamPeople.</h3>
 
-Aqui tem um exemplo e explicação de como usar autenticação por no asp.net core, um pouco diferente da versão 4.6 do asp.net, mas nada muito complicado.
+Aqui tem um exemplo e explicação de como usar autenticação por token no asp.net core, um pouco diferente da versão 4.6 do asp.net, mas nada muito complicado.
 
 Primeiro, a versão do asp.net core utilizada é a 1.1.1, foi criado um projeto padrão com login usando Identity -> Project -> ASP.NET Core Web Application (.NET Core), Authentication: Individual User Accounts. Utlizado Visual Studio 2017 RTM/Final
 

@@ -12,6 +12,10 @@ using Microsoft.Extensions.Options;
 using HowToUseTokenOnAspNetCore.Models;
 using HowToUseTokenOnAspNetCore.Models.AccountViewModels;
 using HowToUseTokenOnAspNetCore.Services;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace HowToUseTokenOnAspNetCore.Controllers
 {
@@ -24,11 +28,13 @@ namespace HowToUseTokenOnAspNetCore.Controllers
         private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
         private readonly string _externalCookieScheme;
+		private IConfigurationRoot _config;
 
-        public AccountController(
+		public AccountController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IOptions<IdentityCookieOptions> identityCookieOptions,
+			IConfigurationRoot config,
             IEmailSender emailSender,
             ISmsSender smsSender,
             ILoggerFactory loggerFactory)
@@ -38,12 +44,127 @@ namespace HowToUseTokenOnAspNetCore.Controllers
             _externalCookieScheme = identityCookieOptions.Value.ExternalCookieAuthenticationScheme;
             _emailSender = emailSender;
             _smsSender = smsSender;
+			_config = config;
             _logger = loggerFactory.CreateLogger<AccountController>();
         }
 
-        //
-        // GET: /Account/Login
-        [HttpGet]
+
+
+		[HttpPost]
+		[AllowAnonymous]
+		public async Task<IActionResult> RegisterWithJson([FromBody]RegisterViewModel model)
+		{
+			try
+			{
+				if (!ModelState.IsValid)
+				{
+					return BadRequest(ModelState);
+				}
+
+				var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+				var result = await _userManager.CreateAsync(user, model.Password);
+				if (!result.Succeeded)
+				{
+					AddErrors(result);
+					return BadRequest(ModelState);
+				}
+				return Ok();
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, ex);
+			}
+		}
+
+		[HttpPost]
+		[AllowAnonymous]
+		public async Task<IActionResult> Token([FromBody]LoginViewModel model)
+		{
+			try
+			{
+				if (!ModelState.IsValid)
+				{
+					return BadRequest(ModelState);
+				}
+
+				var user = await _userManager.FindByNameAsync(model.Email);
+
+				if (user == null)
+					return NotFound();
+
+				if (!await _userManager.CheckPasswordAsync(user, model.Password))
+					return BadRequest("invalid login attempt");
+
+				// Get user claims if you provide
+				var userClams = await _userManager.GetClaimsAsync(user);
+
+				// Get identity claims for identity
+				var identityClaims = new[]
+				{
+					new Claim(ClaimTypes.Name, user.UserName),
+					new Claim(ClaimTypes.NameIdentifier, user.Id),
+					new Claim("AspNet.Identity.SecurityStamp", await _userManager.GetSecurityStampAsync(user)),
+				};
+
+				//var claims = new[]
+				//{
+					//Your custom claims
+					//new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+				//}.Union(userClams).Union(identityClaims);
+
+				var claims = userClams.Union(identityClaims);
+
+				var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Tokens:Key"]));
+
+				var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+				var token = new JwtSecurityToken(
+					issuer: _config["Tokens:Issuer"],
+					audience: _config["Tokens:Audience"],
+					claims: claims,
+					expires: DateTime.UtcNow.AddHours(1),
+					signingCredentials: creds
+					);
+
+				return Ok(new {
+					token = new JwtSecurityTokenHandler().WriteToken(token),
+					expiration = token.ValidTo
+				});
+
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, ex);
+			}
+		}
+		
+		[HttpGet]
+		public async Task<IActionResult> GetUserName()
+		{
+			try
+			{
+				var user = await _userManager.GetUserAsync(HttpContext.User);
+				return Ok(user.UserName);
+			}
+			catch (Exception ex)
+			{
+				return StatusCode(500, ex);
+			}
+		}
+
+
+
+
+
+
+
+
+
+		// IGNORE 
+
+		//
+		// GET: /Account/Login
+		[HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl = null)
         {

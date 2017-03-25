@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using HowToUseTokenOnAspNetCore.Data;
 using HowToUseTokenOnAspNetCore.Models;
 using HowToUseTokenOnAspNetCore.Services;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace HowToUseTokenOnAspNetCore
 {
@@ -43,7 +41,9 @@ namespace HowToUseTokenOnAspNetCore
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+			services.AddSingleton(Configuration);
+
+			services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
@@ -75,8 +75,20 @@ namespace HowToUseTokenOnAspNetCore
 
             app.UseIdentity();
 
-            // Add external authentication middleware below. To configure them please see https://go.microsoft.com/fwlink/?LinkID=532715
-
+			app.UseJwtBearerAuthentication(new JwtBearerOptions()
+			{
+				AutomaticAuthenticate = true,
+				AutomaticChallenge = true,
+				TokenValidationParameters = new TokenValidationParameters()
+				{
+					ValidIssuer = Configuration["Tokens:Issuer"],
+					ValidAudience = Configuration["Tokens:Audience"],					
+					ValidateIssuerSigningKey = true,
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Tokens:Key"])),
+					ValidateLifetime = true
+				}
+			});
+			
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

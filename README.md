@@ -1,4 +1,4 @@
-<h3>hello, TeamPeople.</h3>
+<h3>Hello, TeamPeople.</h3>
 
 Aqui tem um exemplo e explicação de como usar autenticação por token no asp.net core, um pouco diferente da versão 4.6 do asp.net, mas nada muito complicado.
 

@@ -1,0 +1,68 @@
+{
+	"variables": [],
+	"info": {
+		"name": "HowToUseTokenOnAspNetCore",
+		"_postman_id": "3bc51102-6415-b7e6-73ae-544768083965",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Register",
+			"request": {
+				"url": "http://localhost:24285/account/RegisterWithJson",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"jon@me.com\",\n\t\"password\": \"Asd123@\",\n\t\"confirmpassword\": \"Asd123@\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Token",
+			"request": {
+				"url": "http://localhost:24285/account/Token",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"email\": \"jon@me.com\",\n\t\"password\": \"Asd123@\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Test Authentication",
+			"request": {
+				"url": "http://localhost:24285/account/GetUserName",
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiam9uQG1lLmNvbSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWVpZGVudGlmaWVyIjoiZjY5N2JkYTQtNWVhZC00MDkxLTk0YTUtMTBhYjc4OTQ1M2U4IiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiIyMjE2ODM4NC03MmFjLTRjNWEtOTY0Yi03M2U0YWQ0NjQ3MzMiLCJleHAiOjE0OTA0ODY4MTksImlzcyI6Imh0dHA6Ly9tZXVzaXRlaGVyZS5jb20iLCJhdWQiOiJodHRwOi8vbWV1c2l0ZWhlcmUuY29tIn0.oKQLIj-99GlFnDF17kjbN5a2EURVqvn2fLkWKu0TRZ8",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

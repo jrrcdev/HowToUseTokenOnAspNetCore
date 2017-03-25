@@ -142,7 +142,7 @@ namespace HowToUseTokenOnAspNetCore.Controllers
 		public async Task<IActionResult> GetUserName()
 		{
 			try
-			{
+			{ 
 				var user = await _userManager.GetUserAsync(HttpContext.User);
 				return Ok(user.UserName);
 			}
